@@ -36,7 +36,8 @@ rpiSocket.on('connect', function () {
       console.log(data);
       ioServer.emit('arduino_emitting', data);
 
-      if((Date.now() - timer) > 15*60*1000) {
+      if((Date.now() - timer) > 1) {
+        console.log('Saving ...');
         request({
             url: storeURL,
             method: 'POST',
@@ -49,7 +50,7 @@ rpiSocket.on('connect', function () {
             }
           },
           function (error, response, body) {
-            if (!error && response.statusCode == 200) {
+            if (!error && response.statusCode >= 200 && response.statusCode < 300) {
               console.log(body);
             } else {
               console.log(error);
