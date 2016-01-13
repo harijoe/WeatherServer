@@ -36,7 +36,7 @@ rpiSocket.on('connect', function () {
       console.log(data);
       ioServer.emit('arduino_emitting', data);
 
-      if((Date.now() - timer) > 1) {
+      if((Date.now() - timer) > 15*60*1000) {
         console.log('Saving ...');
         request({
             url: storeURL,
