@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var request = require('request');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -12,21 +13,16 @@ var app = express();
 var server = require('http').Server(app);
 
 var port = 3000;
+var storeURL = 'http://localhost:8080';
+var storeURL = 'http://vallini.io:8080/weather_measures';
 server.listen(port);
 console.log('server started on port : ' + port);
-
-//io.on('connection', function (socket) {
-//  socket.emit('news', { hello: 'world' });
-//  socket.on('my other event', function (data) {
-//    console.log(data);
-//  });
-//});
 
 var rpiAddress = 'http://raspi.vallini.io:3000';
 var rpiSocket = require('socket.io-client')(rpiAddress);
 
 var ioServer = require('socket.io')(server);
-ioServer.on('connection', function (socket) {
+ioServer.on('connection', function () {
   ioServer.emit('connected');
 });
 
@@ -34,10 +30,35 @@ rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
   console.log('connected to raspi');
   ioServer.emit('raspi_connected');
+    var timer = Date.now();
     rpiSocket.on('arduino_emitting', function(data) {
       // TODO Save to DB
       console.log(data);
       ioServer.emit('arduino_emitting', data);
+
+      if((Date.now() - timer) > 15*60*1000) {
+        request({
+            url: storeURL,
+            method: 'POST',
+            json: {
+              _format: 'json',
+              measureDateTime: Date.now(),
+              temperature: data.t,
+              luminance: data.lumi,
+              humidity: data.h
+            }
+          },
+          function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              console.log(body);
+            } else {
+              console.log(error);
+              console.log(body);
+            }
+          }
+        );
+        timer = Date.now();
+      }
     });
 });
 
