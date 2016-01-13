@@ -14,10 +14,27 @@ var io = require('socket.io')(server);
 
 server.listen(3000);
 
-io.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
+//io.on('connection', function (socket) {
+//  socket.emit('news', { hello: 'world' });
+//  socket.on('my other event', function (data) {
+//    console.log(data);
+//  });
+//});
+
+var rpiAddress = 'http://raspi.vallini.io:3000';
+var rpiSocket = io.connect(rpiAddress);
+
+var ioServer = require('socket.io')(server);
+ioServer.on('connection', function (socket) {
+  socket.emit('connected');
+});
+
+rpiSocket.on('connect', function () {
+  // we alert the front that we reached the RPI
+  socket.emit('raspi_connected');
+  rpiSocket.on('arduino_emitting', function(data) {
+    // TODO Save to DB
+    socket.emit('arduino_emitting', data);
   });
 });
 
