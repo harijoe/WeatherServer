@@ -10,9 +10,10 @@ var users = require('./routes/users');
 
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
 
-server.listen(3000);
+var port = 3000;
+server.listen(port);
+console.log('server started on port : ' + port);
 
 //io.on('connection', function (socket) {
 //  socket.emit('news', { hello: 'world' });
@@ -22,20 +23,22 @@ server.listen(3000);
 //});
 
 var rpiAddress = 'http://raspi.vallini.io:3000';
-var rpiSocket = io.connect(rpiAddress);
+var rpiSocket = require('socket.io-client')(rpiAddress);
 
 var ioServer = require('socket.io')(server);
 ioServer.on('connection', function (socket) {
-  socket.emit('connected');
+  ioServer.emit('connected');
 });
 
 rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
-  socket.emit('raspi_connected');
-  rpiSocket.on('arduino_emitting', function(data) {
-    // TODO Save to DB
-    socket.emit('arduino_emitting', data);
-  });
+  console.log('connected to raspi');
+  ioServer.emit('raspi_connected');
+    rpiSocket.on('arduino_emitting', function(data) {
+      // TODO Save to DB
+      console.log(data);
+      ioServer.emit('arduino_emitting', data);
+    });
 });
 
 // view engine setup
