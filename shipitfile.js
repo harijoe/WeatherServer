@@ -4,7 +4,7 @@ module.exports = function (shipit) {
 
   shipit.initConfig({
     default: {
-      workspace: '/tmp/raspi-weather-api',
+      workspace: '/tmp/raspi-weather-server',
       repositoryUrl: 'https://github.com/harijoe/WeatherServer',
       ignores: ['.git'],
       keepReleases: 3,
