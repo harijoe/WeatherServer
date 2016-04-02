@@ -33,16 +33,20 @@ ioServer.on('connection', function (socket) {
 });
 
 var timer = Date.now();
+this.url = '';
 
 rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
   console.log('connected to raspi');
   ioServer.emit('raspi_connected');
+  ioServer.emit('photo_ready', this.url);
 });
 
 rpiSocket.on('photo_ready', function (url) {
   console.log('New photo available: '+url);
-});
+  this.url = url;
+  ioServer.emit('photo_ready', this.url);
+}.bind(this));
 
 rpiSocket.on('arduino_emitting', function (data) {
   // TODO Save to DB
