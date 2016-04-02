@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var request = require('request');
+var storage = require('node-persist');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -17,11 +18,12 @@ var storeURL = 'http://vallini.io:8080/weather_measures';
 server.listen(port);
 console.log('server started on port : ' + port);
 
+storage.initSync();
+
 var rpiAddress = 'http://raspi.vallini.io:3000';
 var rpiSocket = require('socket.io-client')(rpiAddress);
 
 var timer = Date.now();
-this.url = '';
 
 var ioServer = require('socket.io')(server);
 ioServer.on('connection', function (socket) {
@@ -32,7 +34,8 @@ ioServer.on('connection', function (socket) {
   socket.on('client_connected', function () {
     console.log('A new client connected');
   });
-  ioServer.emit('photo_ready', this.url);
+  console.log('photo url: '+storage.getItem('photo_url'));
+  ioServer.emit('photo_ready', storage.getItem('photo_url'));
 });
 
 rpiSocket.on('connect', function () {
@@ -43,7 +46,7 @@ rpiSocket.on('connect', function () {
 
 rpiSocket.on('photo_ready', function (url) {
   console.log('New photo available: '+url);
-  this.url = url;
+  storage.setItem('photo_url',url);
   ioServer.emit('photo_ready', this.url);
 }.bind(this));
 
