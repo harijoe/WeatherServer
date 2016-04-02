@@ -32,41 +32,43 @@ ioServer.on('connection', function (socket) {
 
 });
 
+var timer = Date.now();
+
 rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
   console.log('connected to raspi');
   ioServer.emit('raspi_connected');
-  var timer = Date.now();
-  rpiSocket.on('arduino_emitting', function (data) {
-    // TODO Save to DB
-    console.log(data);
-    ioServer.emit('arduino_emitting', data);
+});
 
-    if ((Date.now() - timer) > 15 * 60 * 1000) {
-      console.log('Saving ...');
-      request({
-          url: storeURL,
-          method: 'POST',
-          json: {
-            _format: 'json',
-            measureDateTime: Date.now(),
-            temperature: data.t,
-            luminance: data.lumi,
-            humidity: data.h
-          }
-        },
-        function (error, response, body) {
-          if (!error && response.statusCode >= 200 && response.statusCode < 300) {
-            console.log(body);
-          } else {
-            console.log(error);
-            console.log(body);
-          }
+rpiSocket.on('arduino_emitting', function (data) {
+  // TODO Save to DB
+  console.log(data);
+  ioServer.emit('arduino_emitting', data);
+
+  if ((Date.now() - timer) > 15 * 60 * 1000) {
+    console.log('Saving ...');
+    request({
+        url: storeURL,
+        method: 'POST',
+        json: {
+          _format: 'json',
+          measureDateTime: Date.now(),
+          temperature: data.t,
+          luminance: data.lumi,
+          humidity: data.h
         }
-      );
-      timer = Date.now();
-    }
-  });
+      },
+      function (error, response, body) {
+        if (!error && response.statusCode >= 200 && response.statusCode < 300) {
+          console.log(body);
+        } else {
+          console.log(error);
+          console.log(body);
+        }
+      }
+    );
+    timer = Date.now();
+  }
 });
 
 // view engine setup
