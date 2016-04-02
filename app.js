@@ -40,6 +40,10 @@ rpiSocket.on('connect', function () {
   ioServer.emit('raspi_connected');
 });
 
+rpiSocket.on('photo_ready', function (url) {
+  console.log('New photo available: '+url);
+});
+
 rpiSocket.on('arduino_emitting', function (data) {
   // TODO Save to DB
   console.log(data);
