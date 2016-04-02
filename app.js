@@ -20,6 +20,9 @@ console.log('server started on port : ' + port);
 var rpiAddress = 'http://raspi.vallini.io:3000';
 var rpiSocket = require('socket.io-client')(rpiAddress);
 
+var timer = Date.now();
+this.url = '';
+
 var ioServer = require('socket.io')(server);
 ioServer.on('connection', function (socket) {
   socket.on('take_picture', function () {
@@ -29,17 +32,13 @@ ioServer.on('connection', function (socket) {
   socket.on('client_connected', function () {
     console.log('A new client connected');
   });
-
+  ioServer.emit('photo_ready', this.url);
 });
-
-var timer = Date.now();
-this.url = '';
 
 rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
   console.log('connected to raspi');
   ioServer.emit('raspi_connected');
-  ioServer.emit('photo_ready', this.url);
 });
 
 rpiSocket.on('photo_ready', function (url) {
