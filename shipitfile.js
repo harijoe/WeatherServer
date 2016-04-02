@@ -28,7 +28,7 @@ module.exports = function (shipit) {
 
   var restartForever = function() {
     return shipit.remote("cd " + shipit.releasePath + " && forever -l /var/log/WeatherServer/forever.log restart /var/www/WeatherServer/current/app.js")
-  }
+  };
 
   shipit.on('published', function() {
     return npmInstall()

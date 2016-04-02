@@ -13,7 +13,6 @@ var app = express();
 var server = require('http').Server(app);
 
 var port = 3000;
-var storeURL = 'http://localhost:8080';
 var storeURL = 'http://vallini.io:8080/weather_measures';
 server.listen(port);
 console.log('server started on port : ' + port);
@@ -23,9 +22,14 @@ var rpiSocket = require('socket.io-client')(rpiAddress);
 
 var ioServer = require('socket.io')(server);
 ioServer.on('connection', function (socket) {
+  socket.on('take_picture', function () {
+    console.log('Take picture');
+    rpiSocket.emit('take_picture');
+  });
   socket.on('client_connected', function () {
     console.log('A new client connected');
   });
+
 });
 
 rpiSocket.on('connect', function () {
