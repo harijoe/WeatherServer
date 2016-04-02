@@ -50,7 +50,7 @@ rpiSocket.on('connect', function () {
 rpiSocket.on('photo_ready', function (url) {
   console.log('New photo available: '+url);
   storage.setItem('photo_url',url);
-  ioServer.emit('photo_ready', this.url);
+  ioServer.emit('photo_ready', url);
 }.bind(this));
 
 rpiSocket.on('arduino_emitting', function (data) {
