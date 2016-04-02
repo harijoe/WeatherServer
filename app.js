@@ -18,7 +18,10 @@ var storeURL = 'http://vallini.io:8080/weather_measures';
 server.listen(port);
 console.log('server started on port : ' + port);
 
-storage.initSync();
+storage.initSync({
+  dir:'/tmp/persist',
+}
+);
 
 var rpiAddress = 'http://raspi.vallini.io:3000';
 var rpiSocket = require('socket.io-client')(rpiAddress);
