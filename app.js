@@ -22,45 +22,47 @@ var rpiAddress = 'http://raspi.vallini.io:3000';
 var rpiSocket = require('socket.io-client')(rpiAddress);
 
 var ioServer = require('socket.io')(server);
-ioServer.on('connection', function () {
-  ioServer.emit('connected');
+ioServer.on('connection', function (socket) {
+  socket.on('client_connected', function () {
+    console.log('A new client connected');
+  });
 });
 
 rpiSocket.on('connect', function () {
   // we alert the front that we reached the RPI
   console.log('connected to raspi');
   ioServer.emit('raspi_connected');
-    var timer = Date.now();
-    rpiSocket.on('arduino_emitting', function(data) {
-      // TODO Save to DB
-      console.log(data);
-      ioServer.emit('arduino_emitting', data);
+  var timer = Date.now();
+  rpiSocket.on('arduino_emitting', function (data) {
+    // TODO Save to DB
+    console.log(data);
+    ioServer.emit('arduino_emitting', data);
 
-      if((Date.now() - timer) > 15*60*1000) {
-        console.log('Saving ...');
-        request({
-            url: storeURL,
-            method: 'POST',
-            json: {
-              _format: 'json',
-              measureDateTime: Date.now(),
-              temperature: data.t,
-              luminance: data.lumi,
-              humidity: data.h
-            }
-          },
-          function (error, response, body) {
-            if (!error && response.statusCode >= 200 && response.statusCode < 300) {
-              console.log(body);
-            } else {
-              console.log(error);
-              console.log(body);
-            }
+    if ((Date.now() - timer) > 15 * 60 * 1000) {
+      console.log('Saving ...');
+      request({
+          url: storeURL,
+          method: 'POST',
+          json: {
+            _format: 'json',
+            measureDateTime: Date.now(),
+            temperature: data.t,
+            luminance: data.lumi,
+            humidity: data.h
           }
-        );
-        timer = Date.now();
-      }
-    });
+        },
+        function (error, response, body) {
+          if (!error && response.statusCode >= 200 && response.statusCode < 300) {
+            console.log(body);
+          } else {
+            console.log(error);
+            console.log(body);
+          }
+        }
+      );
+      timer = Date.now();
+    }
+  });
 });
 
 // view engine setup
@@ -71,7 +73,7 @@ app.set('view engine', 'jade');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -79,7 +81,7 @@ app.use('/', routes);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
@@ -90,7 +92,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -101,7 +103,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
