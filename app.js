@@ -54,7 +54,7 @@ rpiSocket.on('photo_ready', function (url) {
 });
 
 rpiSocket.on('photo_status', function(status) {
-  ioServer('photo_status', status);
+  ioServer.emit('photo_status', status);
 });
 
 rpiSocket.on('arduino_emitting', function (data) {
