@@ -39,6 +39,10 @@ ioServer.on('connection', function (socket) {
   });
   console.log('photo url: '+storage.getItem('photo_url'));
   ioServer.emit('photo_ready', storage.getItem('photo_url'));
+
+  socket.on('ping_request', function(startdDate) {
+    socket.emit('ping_response', startdDate)
+  })
 });
 
 rpiSocket.on('connect', function () {
